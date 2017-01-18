@@ -41,7 +41,7 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 X = [ones(size(X,1),1),X]; % X 5000*401
-z2 = Theta1 * X'; % theta1 25*401
+z2 = Theta1 * X'; % theta1 25*401, so z2 = 25*5000;
 a2 = sigmoid(z2)'; % a2 5000*25
 a2 = [ones(size(a2,1),1),a2]; % a2 5000*26 
 
@@ -82,6 +82,30 @@ J = J/size(X,1) + lambda*(sum1+sum2)/(2*size(X,1));
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
+
+m = size(X,1);
+
+Delta1 = zeros(size(Theta1));
+Delta2 = zeros(size(Theta2));
+
+
+for t = 1:m
+  delta3 = zeros(num_labels,1);
+  for K = 1:num_labels
+    if y(t) == K
+      delta3(K) = a3(t,K)-1;
+    else
+      delta3(K) = a3(t,K);
+    end
+  end
+  delta2 = (Theta2'*delta3)(2:end).*sigmoidGradient(z2(:,t)); % delta2 is 25*1
+  Delta2 += delta3*a2(t,:);
+  Delta1 += delta2*X(t,:);
+end
+
+Theta2_grad = Delta2 / m;
+Theta1_grad = Delta1 / m;
+
 % Part 3: Implement regularization with the cost function and gradients.
 %
 %         Hint: You can implement this around the code for
@@ -92,7 +116,8 @@ J = J/size(X,1) + lambda*(sum1+sum2)/(2*size(X,1));
 
 
 
-
+Theta2_grad(:,2:end) = Theta2_grad(:,2:end) .+ lambda * Theta2(:,2:end)/m;
+Theta1_grad(:,2:end) = Theta1_grad(:,2:end) .+ lambda * Theta1(:,2:end)/m;
 
 
 
